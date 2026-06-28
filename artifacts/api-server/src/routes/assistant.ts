@@ -141,10 +141,11 @@ router.post("/assistant/chat", async (req, res) => {
 
 router.get("/assistant/history", async (req, res) => {
   try {
-    const { contractId } = req.query as { contractId?: string };
+    const rawContractId = req.query.contractId as string | undefined;
+    const contractId = rawContractId && rawContractId !== "null" && rawContractId !== "" ? Number(rawContractId) : null;
     let query = db.select().from(chatMessagesTable).$dynamic();
-    if (contractId) {
-      query = query.where(eq(chatMessagesTable.contractId, Number(contractId)));
+    if (contractId !== null && !isNaN(contractId)) {
+      query = query.where(eq(chatMessagesTable.contractId, contractId));
     }
     const messages = await query.orderBy(desc(chatMessagesTable.timestamp)).limit(50);
     res.json(
