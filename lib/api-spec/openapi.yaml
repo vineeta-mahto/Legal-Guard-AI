@@ -1,22 +1,36 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: LegalGuard AI API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: contracts
+    description: Contract management
+  - name: approvals
+    description: Approval center
+  - name: audit
+    description: Audit trail
+  - name: receipts
+    description: Cryptographic receipts
+  - name: notifications
+    description: Notifications
+  - name: team
+    description: Team management
+  - name: dashboard
+    description: Dashboard summary
+  - name: assistant
+    description: AI Legal Assistant
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +38,417 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats and recent activity
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /contracts:
+    get:
+      operationId: listContracts
+      tags: [contracts]
+      summary: List all contracts
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of contracts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contract"
+    post:
+      operationId: createContract
+      tags: [contracts]
+      summary: Upload and create a contract
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContractInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+
+  /contracts/{id}:
+    get:
+      operationId: getContract
+      tags: [contracts]
+      summary: Get a contract by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Contract details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContractDetail"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateContract
+      tags: [contracts]
+      summary: Update a contract
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContractUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+    delete:
+      operationId: deleteContract
+      tags: [contracts]
+      summary: Delete a contract
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /contracts/{id}/analysis:
+    get:
+      operationId: getContractAnalysis
+      tags: [contracts]
+      summary: Get AI analysis for a contract
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Contract analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContractAnalysis"
+
+  /approvals:
+    get:
+      operationId: listApprovals
+      tags: [approvals]
+      summary: List all approval requests
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of approvals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Approval"
+
+  /approvals/{id}:
+    get:
+      operationId: getApproval
+      tags: [approvals]
+      summary: Get approval details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Approval details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Approval"
+
+  /approvals/{id}/approve:
+    post:
+      operationId: approveAction
+      tags: [approvals]
+      summary: Approve an action
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApprovalDecision"
+      responses:
+        "200":
+          description: Approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Approval"
+
+  /approvals/{id}/reject:
+    post:
+      operationId: rejectAction
+      tags: [approvals]
+      summary: Reject an action
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApprovalDecision"
+      responses:
+        "200":
+          description: Rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Approval"
+
+  /audit-trail:
+    get:
+      operationId: listAuditEvents
+      tags: [audit]
+      summary: List audit trail events
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+        - name: to
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of audit events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditEvent"
+
+  /receipts:
+    get:
+      operationId: listReceipts
+      tags: [receipts]
+      summary: List cryptographic receipts
+      responses:
+        "200":
+          description: List of receipts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CryptoReceipt"
+
+  /receipts/{id}:
+    get:
+      operationId: getReceipt
+      tags: [receipts]
+      summary: Get a specific receipt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Receipt details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CryptoReceipt"
+
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: List notifications
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
+  /notifications/{id}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark a notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Marked as read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+
+  /team:
+    get:
+      operationId: listTeamMembers
+      tags: [team]
+      summary: List team members
+      responses:
+        "200":
+          description: List of team members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TeamMember"
+    post:
+      operationId: inviteTeamMember
+      tags: [team]
+      summary: Invite a team member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamMemberInvite"
+      responses:
+        "201":
+          description: Invited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamMember"
+
+  /team/{id}:
+    delete:
+      operationId: removeTeamMember
+      tags: [team]
+      summary: Remove a team member
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed
+
+  /assistant/chat:
+    post:
+      operationId: sendChatMessage
+      tags: [assistant]
+      summary: Send a message to the AI assistant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatMessageInput"
+      responses:
+        "200":
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+
+  /assistant/history:
+    get:
+      operationId: getChatHistory
+      tags: [assistant]
+      summary: Get chat history
+      parameters:
+        - name: contractId
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: Chat history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatMessage"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +456,393 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    DashboardSummary:
+      type: object
+      properties:
+        pendingApprovals:
+          type: integer
+        contractsProcessed:
+          type: integer
+        blockedActions:
+          type: integer
+        aiConfidence:
+          type: number
+        averageRiskScore:
+          type: number
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditEvent"
+        agentHealth:
+          type: string
+        contractsByStatus:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+        approvalsByRisk:
+          type: array
+          items:
+            $ref: "#/components/schemas/RiskCount"
+      required: [pendingApprovals, contractsProcessed, blockedActions, aiConfidence, averageRiskScore, recentActivity, agentHealth, contractsByStatus, approvalsByRisk]
+
+    StatusCount:
+      type: object
+      properties:
+        status:
+          type: string
+        count:
+          type: integer
+      required: [status, count]
+
+    RiskCount:
+      type: object
+      properties:
+        level:
+          type: string
+        count:
+          type: integer
+      required: [level, count]
+
+    Contract:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        client:
+          type: string
+        status:
+          type: string
+        riskScore:
+          type: number
+        riskLevel:
+          type: string
+        uploadedAt:
+          type: string
+        analyzedAt:
+          type: ["string", "null"]
+        fileType:
+          type: string
+        fileSize:
+          type: string
+        assignedTo:
+          type: ["string", "null"]
+      required: [id, name, client, status, riskScore, riskLevel, uploadedAt, fileType, fileSize]
+
+    ContractDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        client:
+          type: string
+        status:
+          type: string
+        riskScore:
+          type: number
+        riskLevel:
+          type: string
+        uploadedAt:
+          type: string
+        analyzedAt:
+          type: ["string", "null"]
+        fileType:
+          type: string
+        fileSize:
+          type: string
+        assignedTo:
+          type: ["string", "null"]
+        summary:
+          type: ["string", "null"]
+        clauses:
+          type: array
+          items:
+            $ref: "#/components/schemas/Clause"
+        obligations:
+          type: array
+          items:
+            type: string
+        deadlines:
+          type: array
+          items:
+            type: string
+      required: [id, name, client, status, riskScore, riskLevel, uploadedAt, fileType, fileSize, clauses, obligations, deadlines]
+
+    Clause:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        riskLevel:
+          type: string
+        isRisky:
+          type: boolean
+        aiSuggestion:
+          type: ["string", "null"]
+      required: [id, title, content, riskLevel, isRisky]
+
+    ContractAnalysis:
+      type: object
+      properties:
+        contractId:
+          type: integer
+        overallRiskScore:
+          type: number
+        riskLevel:
+          type: string
+        executiveSummary:
+          type: string
+        riskyClauses:
+          type: array
+          items:
+            $ref: "#/components/schemas/Clause"
+        missingClauses:
+          type: array
+          items:
+            type: string
+        aiSuggestions:
+          type: array
+          items:
+            type: string
+        confidenceScore:
+          type: number
+        sensitiveActions:
+          type: array
+          items:
+            type: string
+      required: [contractId, overallRiskScore, riskLevel, executiveSummary, riskyClauses, missingClauses, aiSuggestions, confidenceScore, sensitiveActions]
+
+    ContractInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        client:
+          type: string
+          minLength: 1
+        fileType:
+          type: string
+        fileSize:
+          type: string
+        content:
+          type: ["string", "null"]
+      required: [name, client, fileType, fileSize]
+
+    ContractUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        client:
+          type: string
+        status:
+          type: string
+        assignedTo:
+          type: ["string", "null"]
+
+    Approval:
+      type: object
+      properties:
+        id:
+          type: integer
+        contractId:
+          type: integer
+        contractName:
+          type: string
+        client:
+          type: string
+        requestedAction:
+          type: string
+        requestedBy:
+          type: string
+        reason:
+          type: string
+        aiExplanation:
+          type: string
+        riskScore:
+          type: number
+        riskLevel:
+          type: string
+        requiredApprover:
+          type: string
+        estimatedImpact:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+        resolvedAt:
+          type: ["string", "null"]
+        resolvedBy:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+      required: [id, contractId, contractName, client, requestedAction, requestedBy, reason, aiExplanation, riskScore, riskLevel, requiredApprover, estimatedImpact, status, createdAt]
+
+    ApprovalDecision:
+      type: object
+      properties:
+        notes:
+          type: ["string", "null"]
+      required: []
+
+    AuditEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        timestamp:
+          type: string
+        user:
+          type: string
+        agent:
+          type: string
+        action:
+          type: string
+        status:
+          type: string
+        hash:
+          type: string
+        receiptId:
+          type: ["string", "null"]
+        contractId:
+          type: ["integer", "null"]
+        contractName:
+          type: ["string", "null"]
+        details:
+          type: ["string", "null"]
+      required: [id, timestamp, user, agent, action, status, hash]
+
+    CryptoReceipt:
+      type: object
+      properties:
+        id:
+          type: integer
+        receiptId:
+          type: string
+        transactionHash:
+          type: string
+        documentName:
+          type: string
+        requestedBy:
+          type: string
+        approvedBy:
+          type: string
+        timestamp:
+          type: string
+        signature:
+          type: string
+        verificationStatus:
+          type: string
+        approvalId:
+          type: ["integer", "null"]
+      required: [id, receiptId, transactionHash, documentName, requestedBy, approvedBy, timestamp, signature, verificationStatus]
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+        isRead:
+          type: boolean
+        cta:
+          type: ["string", "null"]
+        ctaLink:
+          type: ["string", "null"]
+      required: [id, title, description, category, status, createdAt, isRead]
+
+    TeamMember:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+        joinedAt:
+          type: string
+        lastActive:
+          type: ["string", "null"]
+        avatar:
+          type: ["string", "null"]
+        actionsCount:
+          type: integer
+        approvalsCount:
+          type: integer
+      required: [id, name, email, role, status, joinedAt, actionsCount, approvalsCount]
+
+    TeamMemberInvite:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          minLength: 1
+        role:
+          type: string
+          minLength: 1
+      required: [name, email, role]
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        role:
+          type: string
+        content:
+          type: string
+        timestamp:
+          type: string
+        contractId:
+          type: ["integer", "null"]
+        isBlocked:
+          type: boolean
+        blockedAction:
+          type: ["string", "null"]
+        approvalId:
+          type: ["integer", "null"]
+        confidenceScore:
+          type: ["number", "null"]
+        evidenceRefs:
+          type: array
+          items:
+            type: string
+      required: [id, role, content, timestamp, isBlocked, evidenceRefs]
+
+    ChatMessageInput:
+      type: object
+      properties:
+        message:
+          type: string
+          minLength: 1
+        contractId:
+          type: ["integer", "null"]
+      required: [message]

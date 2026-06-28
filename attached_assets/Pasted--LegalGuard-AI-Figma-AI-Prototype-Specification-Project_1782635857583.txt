@@ -1,0 +1,934 @@
+# LegalGuard AI — Figma AI Prototype Specification
+
+## Project Name
+
+LegalGuard AI
+
+**Tagline**
+Autonomous. Governed. Verified.
+
+---
+
+# Product Overview
+
+LegalGuard AI is an AI-powered legal assistant designed specifically for law firms and enterprises. Unlike traditional AI assistants, LegalGuard AI introduces a governance layer called ArmorIQ that blocks sensitive actions until human approval is received. Every action is cryptographically logged, creating an immutable audit trail and verification receipt.
+
+The UI should feel modern, premium, enterprise-grade, trustworthy, minimal, and security-first.
+
+---
+
+# Design Style
+
+Style:
+Modern SaaS
+Enterprise
+Minimal
+Premium
+Dark + Light Theme
+
+Design Inspiration:
+Stripe
+Linear
+Notion
+OpenAI
+Vercel
+Retool
+
+Font
+
+Inter
+
+Primary Color
+
+#2563EB
+
+Secondary
+
+#1E40AF
+
+Accent
+
+#06B6D4
+
+Success
+
+#16A34A
+
+Warning
+
+#F59E0B
+
+Danger
+
+#DC2626
+
+Background
+
+#F8FAFC
+
+Dark Background
+
+#0F172A
+
+Cards
+
+White
+
+Border Radius
+
+16px
+
+Spacing
+
+8px Grid
+
+Buttons
+
+Rounded
+Medium Shadow
+
+Icons
+
+Lucide Icons
+
+Animations
+
+Smooth Fade
+
+Slide Panels
+
+Micro Interactions
+
+---
+
+# Navigation
+
+Sidebar
+
+• Dashboard
+
+• AI Assistant
+
+• Contracts
+
+• Approval Center
+
+• Audit Trail
+
+• Cryptographic Receipts
+
+• Notifications
+
+• Team
+
+• Settings
+
+---
+
+# PAGE 1 — Landing Page
+
+Hero Section
+
+Headline
+
+The First AI Legal Agent That Knows Its Own Limits
+
+Subheading
+
+Autonomous legal workflows with human approval, cryptographic verification, and complete audit trails.
+
+Primary CTA
+
+Start Free
+
+Secondary CTA
+
+Book Demo
+
+Sections
+
+Hero
+
+Features
+
+How It Works
+
+Industries
+
+Testimonials
+
+Pricing
+
+Footer
+
+Illustration
+
+AI Agent
+
+↓
+
+ArmorIQ
+
+↓
+
+Human Approval
+
+↓
+
+Verified Execution
+
+---
+
+# PAGE 2 — Login
+
+Fields
+
+Email
+
+Password
+
+Remember Me
+
+Forgot Password
+
+Login Button
+
+Continue with Google
+
+Company Logo
+
+Security Badge
+
+---
+
+# PAGE 3 — Signup
+
+Fields
+
+Name
+
+Organization
+
+Email
+
+Password
+
+Confirm Password
+
+Create Workspace
+
+---
+
+# PAGE 4 — Dashboard
+
+Top Bar
+
+Search
+
+Notifications
+
+Profile
+
+Organization Switcher
+
+Widgets
+
+Pending Approvals
+
+Recent Contracts
+
+Today's Activity
+
+Agent Health
+
+Recent Audit Logs
+
+Quick Actions
+
+Charts
+
+Contracts Processed
+
+Approvals
+
+Blocked Actions
+
+Sidebar Quick Buttons
+
+Upload Contract
+
+Open AI Assistant
+
+Approval Center
+
+---
+
+# PAGE 5 — AI Legal Assistant
+
+Main Layout
+
+Two Column
+
+Left
+
+Conversation
+
+Right
+
+Contract Context
+
+Chat Features
+
+Prompt Input
+
+Voice Input
+
+Suggested Prompts
+
+Upload File
+
+Conversation History
+
+Typing Animation
+
+AI Response Cards
+
+Right Panel
+
+Contract Summary
+
+Risk Score
+
+Key Clauses
+
+Obligations
+
+Deadlines
+
+Sensitive Actions
+
+Confidence Score
+
+Evidence References
+
+Buttons
+
+Export
+
+Generate Summary
+
+Generate Redlines
+
+Send to Client
+
+Sensitive actions should display
+
+BLOCKED BY ARMORIQ
+
+instead of executing.
+
+---
+
+# PAGE 6 — Upload Contract
+
+Large Drag & Drop
+
+Upload PDF
+
+DOCX
+
+TXT
+
+Progress Bar
+
+Recent Uploads
+
+Supported Formats
+
+After Upload
+
+Start Analysis Button
+
+---
+
+# PAGE 7 — Contract Analysis
+
+Sections
+
+Overall Risk Score
+
+Executive Summary
+
+Clause Extraction
+
+Missing Clauses
+
+Risky Clauses
+
+AI Suggestions
+
+Highlighted Contract Viewer
+
+Buttons
+
+Approve Draft
+
+Export PDF
+
+Ask AI
+
+---
+
+# PAGE 8 — Approval Center
+
+Main Table
+
+Columns
+
+Contract
+
+Requested Action
+
+Requested By
+
+Risk
+
+Time
+
+Status
+
+Buttons
+
+Approve
+
+Reject
+
+View Details
+
+Each approval card contains
+
+Client
+
+Requested Action
+
+Reason
+
+AI Explanation
+
+Risk Score
+
+Required Approver
+
+Estimated Impact
+
+---
+
+# PAGE 9 — Approval Details
+
+Header
+
+Requested Action
+
+Requested By
+
+Timestamp
+
+AI Reasoning
+
+Contract Preview
+
+Action Details
+
+Risk Explanation
+
+Buttons
+
+Approve
+
+Reject
+
+Request Changes
+
+---
+
+# PAGE 10 — Audit Trail
+
+Timeline Layout
+
+Each Event Shows
+
+Timestamp
+
+User
+
+Agent
+
+Action
+
+Status
+
+Hash
+
+Receipt ID
+
+Search
+
+Filters
+
+Export CSV
+
+Export PDF
+
+Status Colors
+
+Green
+
+Executed
+
+Yellow
+
+Pending
+
+Red
+
+Blocked
+
+---
+
+# PAGE 11 — Cryptographic Receipt
+
+Receipt Card
+
+Receipt ID
+
+Transaction Hash
+
+Document Name
+
+Requested By
+
+Approved By
+
+Timestamp
+
+Signature
+
+Verification Status
+
+Buttons
+
+Download Receipt
+
+Verify Again
+
+Copy Hash
+
+Looks similar to blockchain explorer.
+
+---
+
+# PAGE 12 — Notifications
+
+Tabs
+
+All
+
+Approvals
+
+AI
+
+Security
+
+Audit
+
+Each Notification
+
+Title
+
+Time
+
+Description
+
+Status
+
+CTA
+
+---
+
+# PAGE 13 — Team Management
+
+Members Table
+
+Invite Member
+
+Roles
+
+Admin
+
+Reviewer
+
+Lawyer
+
+Viewer
+
+Permissions Matrix
+
+Activity
+
+Remove Member
+
+---
+
+# PAGE 14 — Organization Settings
+
+Organization Logo
+
+Workspace Name
+
+Billing
+
+Integrations
+
+Security
+
+API Keys
+
+SSO
+
+Password Policy
+
+Approval Policies
+
+Audit Settings
+
+---
+
+# PAGE 15 — Pricing
+
+Starter
+
+Professional
+
+Enterprise
+
+Comparison Table
+
+CTA
+
+Start Free Trial
+
+---
+
+# PAGE 16 — Help Center
+
+Search
+
+Documentation
+
+Tutorials
+
+FAQ
+
+Live Chat
+
+Support Email
+
+Book Demo
+
+---
+
+# Components
+
+Buttons
+
+Primary
+
+Secondary
+
+Danger
+
+Ghost
+
+Cards
+
+Statistics Card
+
+Approval Card
+
+Contract Card
+
+Receipt Card
+
+Tables
+
+Contracts
+
+Audit Logs
+
+Users
+
+Approvals
+
+Inputs
+
+Text
+
+Password
+
+Search
+
+Dropdown
+
+Checkbox
+
+Radio
+
+Toggle
+
+Progress Bar
+
+Timeline
+
+Chat Bubble
+
+Toast
+
+Loader
+
+Empty State
+
+Badges
+
+Risk Low
+
+Risk Medium
+
+Risk High
+
+Status
+
+Approved
+
+Pending
+
+Rejected
+
+Blocked
+
+---
+
+# AI Flow
+
+User uploads contract
+
+↓
+
+AI reads contract
+
+↓
+
+Summary generated
+
+↓
+
+Risks identified
+
+↓
+
+User requests "Send to Client"
+
+↓
+
+ArmorIQ intercepts action
+
+↓
+
+Sensitive Action Detected
+
+↓
+
+Approval Request Created
+
+↓
+
+Notification Sent
+
+↓
+
+Manager Reviews
+
+↓
+
+Approve
+
+↓
+
+Action Executes
+
+↓
+
+Cryptographic Receipt Generated
+
+↓
+
+Audit Trail Updated
+
+---
+
+# Dashboard Widgets
+
+Pending Approvals
+
+Contracts Processed
+
+AI Confidence
+
+Average Risk Score
+
+Recent Receipts
+
+Blocked Actions
+
+Recent Activity
+
+Agent Health
+
+---
+
+# Empty States
+
+No Contracts
+
+Upload your first contract.
+
+No Approvals
+
+Everything looks good.
+
+No Notifications
+
+You're all caught up.
+
+---
+
+# Responsive Layout
+
+Desktop
+
+1440px
+
+Tablet
+
+768px
+
+Mobile
+
+390px
+
+Collapsible Sidebar
+
+Bottom Navigation on Mobile
+
+---
+
+# Prototype Interactions
+
+Click Upload Contract
+
+↓
+
+Select PDF
+
+↓
+
+Upload Animation
+
+↓
+
+AI Analysis Starts
+
+↓
+
+Summary Appears
+
+↓
+
+Ask AI Question
+
+↓
+
+AI Responds
+
+↓
+
+Click Send to Client
+
+↓
+
+ArmorIQ Blocks Action
+
+↓
+
+Approval Modal Opens
+
+↓
+
+Manager Clicks Approve
+
+↓
+
+Action Executes
+
+↓
+
+Receipt Generated
+
+↓
+
+Audit Timeline Updates
+
+↓
+
+Success Notification Appears
+
+---
+
+# Design Keywords
+
+Premium
+
+Modern
+
+Clean
+
+Enterprise
+
+Trustworthy
+
+Security First
+
+AI Native
+
+Governance
+
+Minimal
+
+Professional
+
+Fast
+
+High Contrast
+
+Smooth Animations
+
+Glassmorphism (light usage)
+
+Rounded Cards
+
+Soft Shadows
+
+Consistent 8px spacing
+
+Accessible UI
+
+Focus on dashboards, approvals, AI chat, and audit visibility.
