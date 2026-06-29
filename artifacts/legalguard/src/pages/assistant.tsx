@@ -6,14 +6,38 @@ import { Card } from "@/components/ui/card";
 import { Lock, Send, Bot, User, FileText, ShieldCheck, AlertTriangle } from "lucide-react";
 import { useGetChatHistory, useSendChatMessage, getGetChatHistoryQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+
+interface SessionMessage {
+  id: number;
+  role: string;
+  content: string;
+  isBlocked?: boolean;
+  blockedAction?: string | null;
+  evidenceRefs?: string[];
+}
 
 export default function Assistant() {
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const { userType } = useUser();
+  const isIndividual = userType === "individual";
 
-  const { data: history, isLoading } = useGetChatHistory({ contractId: null });
+  // Individual users: session-only messages (fresh every visit)
+  const [sessionMessages, setSessionMessages] = useState<SessionMessage[]>([]);
+  const [sessionMsgId, setSessionMsgId] = useState(1000);
+
+  // Org users: load from API
+  const { data: history, isLoading } = useGetChatHistory(
+    { contractId: null },
+    { query: { enabled: !isIndividual, queryKey: getGetChatHistoryQueryKey({ contractId: null }) } }
+  );
+
   const sendMessage = useSendChatMessage();
+
+  const displayMessages = isIndividual ? sessionMessages : (history ?? []);
+  const isHistoryLoading = isIndividual ? false : isLoading;
 
   const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -21,7 +45,7 @@ export default function Assistant() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [history]);
+  }, [displayMessages]);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,17 +54,67 @@ export default function Assistant() {
     const messageText = input;
     setInput("");
 
-    sendMessage.mutate(
-      { data: { message: messageText, contractId: null } },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries({
-            queryKey: getGetChatHistoryQueryKey({ contractId: null }),
-          });
-        },
-      }
-    );
+    if (isIndividual) {
+      // Add user message to session immediately
+      const userMsg: SessionMessage = {
+        id: sessionMsgId,
+        role: "user",
+        content: messageText,
+      };
+      setSessionMessages(prev => [...prev, userMsg]);
+      setSessionMsgId(prev => prev + 1);
+
+      sendMessage.mutate(
+        { data: { message: messageText, contractId: null } },
+        {
+          onSuccess: (data) => {
+            // Add the AI reply to session state
+            const aiMsg: SessionMessage = {
+              id: sessionMsgId + 1,
+              role: data.role ?? "assistant",
+              content: data.content ?? "",
+              isBlocked: data.isBlocked ?? false,
+              blockedAction: data.blockedAction ?? null,
+              evidenceRefs: Array.isArray(data.evidenceRefs) ? (data.evidenceRefs as string[]) : [],
+            };
+            setSessionMessages(prev => [...prev, aiMsg]);
+            setSessionMsgId(prev => prev + 2);
+          },
+        }
+      );
+    } else {
+      // Org users: persist to API and reload history
+      sendMessage.mutate(
+        { data: { message: messageText, contractId: null } },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({
+              queryKey: getGetChatHistoryQueryKey({ contractId: null }),
+            });
+          },
+        }
+      );
+    }
   };
+
+  const orgSuggestions = [
+    "Analyze the indemnification clause",
+    "What are the key risks in this contract?",
+    "Draft a liability cap provision",
+    "Summarize the payment terms",
+  ];
+
+  const individualSuggestions = [
+    "Is my freelance contract fair?",
+    "What does this lease clause mean?",
+    "Explain my employment offer letter",
+    "What should I watch out for when signing?",
+  ];
+
+  const suggestions = isIndividual ? individualSuggestions : orgSuggestions;
+  const emptyStateLabel = isIndividual
+    ? "Ask me anything about your contracts or legal documents."
+    : "Start a conversation. ArmorIQ is monitoring for compliance.";
 
   return (
     <div className="h-[calc(100vh-8rem)] flex gap-6 animate-in fade-in duration-500">
@@ -52,8 +126,10 @@ export default function Assistant() {
               <Bot className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="font-semibold">Legal Agent</h2>
-              <p className="text-xs text-muted-foreground">Always active • ArmorIQ Enabled</p>
+              <h2 className="font-semibold">{isIndividual ? "AI Legal Assistant" : "Legal Agent"}</h2>
+              <p className="text-xs text-muted-foreground">
+                {isIndividual ? "Personal session • Fresh each visit" : "Always active • ArmorIQ Enabled"}
+              </p>
             </div>
           </div>
           {sendMessage.isPending && (
@@ -70,13 +146,13 @@ export default function Assistant() {
 
         <ScrollArea className="flex-1 p-6">
           <div className="space-y-6">
-            {isLoading ? (
+            {isHistoryLoading ? (
               <div className="space-y-4">
                 <div className="h-12 w-3/4 bg-muted animate-pulse rounded-lg" />
                 <div className="h-12 w-1/2 bg-muted animate-pulse rounded-lg ml-auto" />
               </div>
-            ) : history && history.length > 0 ? (
-              history.map((msg) => (
+            ) : displayMessages.length > 0 ? (
+              displayMessages.map((msg) => (
                 <div key={msg.id} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
                   <div className={`h-8 w-8 shrink-0 rounded-full flex items-center justify-center ${
                     msg.role === "user" ? "bg-primary/20 text-primary" : "bg-secondary/20 text-secondary"
@@ -117,14 +193,9 @@ export default function Assistant() {
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center space-y-4 text-muted-foreground mt-20">
                 <ShieldCheck className="h-12 w-12 text-primary/40" />
-                <p>Start a conversation. ArmorIQ is monitoring for compliance.</p>
+                <p>{emptyStateLabel}</p>
                 <div className="grid grid-cols-2 gap-2 max-w-sm mt-2">
-                  {[
-                    "Analyze the indemnification clause",
-                    "What are the key risks in this contract?",
-                    "Draft a liability cap provision",
-                    "Summarize the payment terms",
-                  ].map((suggestion) => (
+                  {suggestions.map((suggestion) => (
                     <button
                       key={suggestion}
                       onClick={() => setInput(suggestion)}
@@ -161,7 +232,9 @@ export default function Assistant() {
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about a contract, legal precedent, or draft a clause..."
+              placeholder={isIndividual
+                ? "Ask about your contract, lease, job offer..."
+                : "Ask about a contract, legal precedent, or draft a clause..."}
               className="flex-1 bg-muted/50 border-border focus-visible:ring-primary h-12"
               disabled={sendMessage.isPending}
             />
@@ -178,39 +251,53 @@ export default function Assistant() {
 
       {/* Right Context Panel */}
       <div className="w-80 hidden lg:flex flex-col gap-4">
-        <Card className="p-4 shadow-sm border-border bg-gradient-to-br from-card to-muted/20">
-          <div className="flex items-center gap-2 mb-4">
-            <Lock className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold">ArmorIQ Status</h3>
-          </div>
-          <p className="text-sm text-muted-foreground mb-4">
-            Vigilant mode is active. All prompt executions and outputs are hashed and logged to the immutable audit trail.
-          </p>
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs">
-              <span>Current Threat Level</span>
-              <span className="text-green-500 font-medium">Low</span>
+        {isIndividual ? (
+          <Card className="p-4 shadow-sm border-border bg-gradient-to-br from-blue-500/5 to-card">
+            <div className="flex items-center gap-2 mb-3">
+              <User className="h-5 w-5 text-blue-500" />
+              <h3 className="font-semibold text-sm">Personal Session</h3>
             </div>
-            <div className="flex justify-between text-xs">
-              <span>Policy Engine</span>
-              <span className="text-primary font-medium">Strict</span>
+            <p className="text-sm text-muted-foreground">
+              Your chat is private and session-only. It starts fresh every time you open this page — nothing is stored or visible to others.
+            </p>
+          </Card>
+        ) : (
+          <Card className="p-4 shadow-sm border-border bg-gradient-to-br from-card to-muted/20">
+            <div className="flex items-center gap-2 mb-4">
+              <Lock className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold">ArmorIQ Status</h3>
             </div>
-          </div>
-        </Card>
+            <p className="text-sm text-muted-foreground mb-4">
+              Vigilant mode is active. All prompt executions and outputs are hashed and logged to the immutable audit trail.
+            </p>
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span>Current Threat Level</span>
+                <span className="text-green-500 font-medium">Low</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span>Policy Engine</span>
+                <span className="text-primary font-medium">Strict</span>
+              </div>
+            </div>
+          </Card>
+        )}
 
-        <Card className="p-4 shadow-sm border-border">
-          <h3 className="font-semibold mb-3 flex items-center gap-2 text-sm">
-            <AlertTriangle className="h-4 w-4 text-amber-500" /> Sensitive Keywords
-          </h3>
-          <div className="flex flex-wrap gap-1.5">
-            {["send to client", "execute contract", "share externally", "sign contract", "release payment"].map(k => (
-              <span key={k} className="text-xs px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-600">
-                {k}
-              </span>
-            ))}
-          </div>
-          <p className="text-xs text-muted-foreground mt-3">Typing these phrases will trigger ArmorIQ and create an approval request.</p>
-        </Card>
+        {!isIndividual && (
+          <Card className="p-4 shadow-sm border-border">
+            <h3 className="font-semibold mb-3 flex items-center gap-2 text-sm">
+              <AlertTriangle className="h-4 w-4 text-amber-500" /> Sensitive Keywords
+            </h3>
+            <div className="flex flex-wrap gap-1.5">
+              {["send to client", "execute contract", "share externally", "sign contract", "release payment"].map(k => (
+                <span key={k} className="text-xs px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-600">
+                  {k}
+                </span>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">Typing these phrases will trigger ArmorIQ and create an approval request.</p>
+          </Card>
+        )}
 
         <Card className="flex-1 shadow-sm border-border p-4 flex flex-col">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
