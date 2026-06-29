@@ -3,12 +3,14 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { UserProvider } from "@/contexts/UserContext";
 import NotFound from "@/pages/not-found";
 
 import Landing from "@/pages/landing";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
 import Dashboard from "@/pages/dashboard";
+import UserDashboard from "@/pages/user-dashboard";
 import Assistant from "@/pages/assistant";
 import Contracts from "@/pages/contracts";
 import ContractsUpload from "@/pages/contracts-upload";
@@ -31,8 +33,13 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
-      
-      {/* App Routes */}
+
+      {/* Individual user dashboard */}
+      <Route path="/user-dashboard">
+        {() => <AppLayout><UserDashboard /></AppLayout>}
+      </Route>
+
+      {/* Organization / shared app routes */}
       <Route path="/dashboard">
         {() => <AppLayout><Dashboard /></AppLayout>}
       </Route>
@@ -48,14 +55,12 @@ function Router() {
       <Route path="/contracts">
         {() => <AppLayout><Contracts /></AppLayout>}
       </Route>
-      
       <Route path="/approvals/:id">
         {() => <AppLayout><ApprovalDetail /></AppLayout>}
       </Route>
       <Route path="/approvals">
         {() => <AppLayout><Approvals /></AppLayout>}
       </Route>
-      
       <Route path="/audit-trail">
         {() => <AppLayout><AuditTrail /></AppLayout>}
       </Route>
@@ -71,8 +76,7 @@ function Router() {
       <Route path="/settings">
         {() => <AppLayout><Settings /></AppLayout>}
       </Route>
-      
-      {/* Catch-all */}
+
       <Route component={NotFound} />
     </Switch>
   );
@@ -82,10 +86,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
+        <UserProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+          </WouterRouter>
+          <Toaster />
+        </UserProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
